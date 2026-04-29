@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xét Học Lực THPT - Thông tư 22</title>
+    <style>
+        :root { --primary: #2563eb; --success: #059669; --error: #dc2626; --bg: #f8fafc; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); padding: 15px; color: #1e293b; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+        .desc { text-align: center; font-size: 0.9em; color: #64748b; margin-bottom: 25px; }
+        
+        .grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .card { padding: 15px; border: 1px solid #e2e8f0; border-radius: 10px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #475569; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; transition: 0.2s; box-sizing: border-box; }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+        .btn-group { margin-top: 25px; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+        #resultArea { margin-top: 25px; padding: 20px; border-radius: 12px; display: none; border-left: 8px solid var(--primary); background: #f1f5f9; }
+        .rank-label { font-size: 24px; font-weight: 800; margin: 10px 0; }
+        .analysis { font-size: 14px; line-height: 1.6; color: #475569; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Xếp Loại Học Lực THPT</h2>
+    <p class="desc">Tích hợp thuật toán điều chỉnh thông minh theo Thông tư 22/2021/TT-BGDĐT</p>
+
+    <div class="grid-layout">
+        <div class="card">
+            <label>Toán học</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+            <label>Ngữ văn</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+            <label>Ngoại ngữ</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+            <label>Vật lí</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+            <label>Địa lí</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+        </div>
+        <div class="card">
+            <label>Lịch sử</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+            <label>Tin học</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+            <label>GDQP & AN</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+            <label>Môn lựa chọn 1</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+            <label>Môn lựa chọn 2</label><input type="number" class="score" step="0.1" placeholder="ĐTB môn">
+        </div>
+        <div class="card" style="background: #f8fafc;">
+            <label>Giáo dục thể chất</label>
+            <select class="check"><option value="Đạt">Đạt</option><option value="Chưa đạt">Chưa đạt</option></select>
+            
+            <label style="margin-top:15px;">Hoạt động TN, HN</label>
+            <select class="check"><option value="Đạt">Đạt</option><option value="Chưa đạt">Chưa đạt</option></select>
+            
+            <label style="margin-top:15px;">Nội dung GD địa phương</label>
+            <select class="check"><option value="Đạt">Đạt</option><option value="Chưa đạt">Chưa đạt</option></select>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button onclick="analyzeAcademic()">XEM KẾT QUẢ XẾP LOẠI</button>
+    </div>
+
+    <div id="resultArea">
+        <div class="analysis" id="analysisText"></div>
+        <div class="rank-label" id="rankLabel"></div>
+        <div id="smartNote"></div>
+    </div>
+</div>
+
+<script>
+    function checkLevel(scores, checks) {
+        const allChecksPass = checks.every(c => c === "Đạt");
+        const countChecksFail = checks.filter(c => c === "Chưa đạt").length;
+        const minScore = Math.min(...scores);
+        const count8 = scores.filter(s => s >= 8.0).length;
+        const count65 = scores.filter(s => s >= 6.5).length;
+        const count5 = scores.filter(s => s >= 5.0).length;
+
+        // 1. Mức Tốt
+        if (allChecksPass && minScore >= 6.5 && count8 >= 6) return 4;
+        // 2. Mức Khá
+        if (allChecksPass && minScore >= 5.0 && count65 >= 6) return 3;
+        // 3. Mức Đạt
+        if (countChecksFail <= 1 && minScore >= 3.5 && count5 >= 6) return 2;
+        // 4. Chưa đạt
+        return 1;
+    }
+
+    function analyzeAcademic() {
+        const scoreInputs = document.querySelectorAll('.score');
+        const checkInputs = document.querySelectorAll('.check');
+        
+        let scores = [];
+        for(let input of scoreInputs) {
+            if(input.value === "") return alert("Vui lòng nhập đủ điểm trung bình môn!");
+            scores.push(parseFloat(input.value));
+        }
+        
+        let checks = [];
+        for(let select of checkInputs) checks.push(select.value);
+
+        // Tính GPA chung (để xét tuyển ĐH)
+        let gpa = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+        
+        // Xét mức hiện tại
+        let currentLevel = checkLevel(scores, checks);
+        let finalLevel = currentLevel;
+        let isUpgraded = false;
+
+        // Thuật toán thông minh: Thử nâng mức (Luật điều chỉnh TT22)
+        if (currentLevel < 4) {
+            let nextLevel = currentLevel + 1;
+            let canUpgrade = false;
+
+            // Thử giả định từng môn đơn lẻ để xem có đạt mức trên không
+            for(let i=0; i<scores.length; i++) {
+                let temp = [...scores]; temp[i] = 10; // Giả định môn này đạt điểm cao
+                if(checkLevel(temp, checks) >= nextLevel) { canUpgrade = true; break; }
+            }
+            if(!canUpgrade) {
+                for(let i=0; i<checks.length; i++) {
+                    let temp = [...checks]; temp[i] = "Đạt";
+                    if(checkLevel(scores, temp) >= nextLevel) { canUpgrade = true; break; }
+                }
+            }
+
+            if(canUpgrade) {
+                finalLevel = nextLevel;
+                isUpgraded = true;
+            }
+        }
+
+        const labels = ["", "CHƯA ĐẠT", "ĐẠT", "KHÁ", "TỐT"];
+        const colors = ["", "#64748b", "#059669", "#d97706", "#2563eb"];
+
+        // Hiển thị kết quả
+        const resArea = document.getElementById('resultArea');
+        resArea.style.display = 'block';
+        resArea.style.borderColor = colors[finalLevel];
+        
+        document.getElementById('analysisText').innerHTML = `Điểm trung bình cộng ${scores.length} môn: <b>${gpa}</b>`;
+        document.getElementById('rankLabel').innerText = labels[finalLevel];
